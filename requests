@@ -1,0 +1,99 @@
+
+
+POST - Adăugare conversii (exemple pentru toate tipurile)
+
+a) Masă: kg → pounds
+
+curl -X POST http://localhost:5000/convert \
+-H "Content-Type: application/json" \
+-d '{
+    "type": "mass",
+    "from": "kg",
+    "to": "pound",
+    "value": 1
+}'
+
+b) Lungime: km → miles
+
+curl -X POST http://localhost:5000/convert \
+-H "Content-Type: application/json" \
+-d '{
+    "type": "length",
+    "from": "km",
+    "to": "mile",
+    "value": 1
+}'
+
+c) Energie: kW → W
+
+curl -X POST http://localhost:5000/convert \
+-H "Content-Type: application/json" \
+-d '{
+    "type": "energy",
+    "from": "kW",
+    "to": "W",
+    "value": 1
+}'
+
+3. GET - Listare conversii
+
+a) Toate conversiile
+curl -X GET http://localhost:5000/convert
+b) Conversie specifică (ID=1)
+curl -X GET http://localhost:5000/convert/1
+
+4. PATCH - Actualizare parțială cu recalculare
+a) Schimbă doar valoarea (recalculează pounds)
+curl -X PATCH http://localhost:5000/convert/1 \
+-H "Content-Type: application/json" \
+-d '{"value": 10}'
+b) Schimbă unitățile (kg → g)
+curl -X PATCH http://localhost:5000/convert/1 \
+-H "Content-Type: application/json" \
+-d '{"from": "kg", "to": "g"}'
+c) Schimbă tot (cu recalculare automată)
+curl -X PATCH http://localhost:5000/convert/1 \
+-H "Content-Type: application/json" \
+-d '{"from": "kg", "to": "pound", "value": 5}'
+
+5. PUT - Actualizare completă cu recalculare
+curl -X PUT http://localhost:5000/convert/1 \
+-H "Content-Type: application/json" \
+-d '{
+    "type": "mass",
+    "from": "kg",
+    "to": "pound",
+    "value": 20
+}'
+
+6. DELETE - Ștergere
+curl -X DELETE http://localhost:5000/convert/1
+
+7. HEAD - Verificare existență
+curl -I -X HEAD http://localhost:5000/convert/1
+
+8. OPTIONS - Metode disponibile
+curl -X OPTIONS http://localhost:5000/convert -i
+
+Teste pentru erori
+a) Unitate invalidă
+curl -X POST http://localhost:5000/convert \
+-H "Content-Type: application/json" \
+-d '{
+    "type": "mass",
+    "from": "litru",
+    "to": "kg",
+    "value": 1
+}'
+b) Parametru lipsă
+curl -X POST http://localhost:5000/convert \
+-H "Content-Type: application/json" \
+-d '{
+    "type": "mass",
+    "from": "kg",
+    "to": "pound"
+}'
+c) ID inexistent (PATCH/PUT/DELETE)
+curl -X PATCH http://localhost:5000/convert/999 \
+-H "Content-Type: application/json" \
+-d '{"value": 10}'
