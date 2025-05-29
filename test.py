@@ -217,6 +217,43 @@ def options_convert():
         'Access-Control-Allow-Headers': 'Content-Type'
     }
 
+@app.route('/cities/<country_code>', methods=['GET'])
+def get_top_cities(country_code):
+    url = f"https://countries-cities.p.rapidapi.com/location/country/{country_code}/city/list"
+    querystring = {
+        "page": "1",
+        "per_page": "10",
+        "format": "json",
+        "population": "1000"
+    }
+
+    headers = {
+        "x-rapidapi-key": "bbb74778a0msh68508213e2e802ep10a33djsnc2d1ba2ee9e7",
+        "x-rapidapi-host": "countries-cities.p.rapidapi.com"
+    }
+
+    try:
+        response = requests.get(url, headers=headers, params=querystring, timeout=10)
+        response.raise_for_status()
+        data = response.json()
+
+        # Pune Cahul primul dacă este Moldova
+        if country_code.upper() == "MD":
+            cities = data.get("cities", [])
+            if not any(city.get("name", "").lower() == "cahul" for city in cities):
+                cities.insert(0, {
+                    "name": "Cahul",
+                    "latitude": 45.9026,
+                    "longitude": 28.1943
+                })
+            data["cities"] = cities
+
+        return jsonify(data)
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
 @app.route('/energy', methods=['GET'])
 def get_energy_data():
     lat = 47.16  # Iași
@@ -244,5 +281,4 @@ if __name__ == '__main__':
     # Create database tables within application context
     with app.app_context():
         db.create_all()
-    port = int(os.environ.get("PORT", 5000))
-app.run(host="0.0.0.0", port=port)
+    app.run(debug=True)
